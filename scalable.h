@@ -11,23 +11,24 @@
 // We cast it to std::function with fun() function instead.
 
 template <typename F>
-struct lambdaToFunction
-: public lambdaToFunction<decltype(&F::operator())>
+struct LambdaToFunction
+: public LambdaToFunction<decltype(&F::operator())>
 {
 
 };
+
 template <typename Cls, typename Ret, typename... Args>
-struct lambdaToFunction<Ret(Cls::*)(Args...) const>
+struct LambdaToFunction<Ret(Cls::*)(Args...) const>
 {
     typedef std::function<Ret(Args...)> f;
 };
 
 
 template <typename F>
-typename lambdaToFunction<F>::f
+typename LambdaToFunction<F>::f
 fun (const F& lambda)
 {
-    return typename lambdaToFunction<F>::f(lambda);
+    return typename LambdaToFunction<F>::f(lambda);
 }
 // *************************************************
 
@@ -43,10 +44,13 @@ std::function<T1(T3)> operator&( const std::function<T1(T2)> & f1, const std::fu
 // such as vector, set or in future deque, list, undordered_set.
 // This is a small PoC, only vector and set are supported, and I will replace this soon.
 
+template<typename K, typename T, template<typename,typename, typename...> class V, typename... Args>
+class SpanMap ;
+
 template<typename T, template<typename, typename...> class V, typename... Args>
 class Span {
-	V<T,Args...> container;
 public:
+	V<T,Args...> container;
 	Span(){
 
 	}
@@ -56,39 +60,25 @@ public:
 	V<T,Args...> get() {
 		return container;
 	}
-	template<typename Q, typename W=V<T, Args...>>
-	typename std::enable_if<std::is_same<W, std::vector<typename W::value_type,typename W::allocator_type>>::value,
-	Span<Q,V,Args...>>::type map ( std::function<Q(T)> f) {
+    template<typename Q>
+	Span<Q,V,Args...> map ( std::function<Q(T)> f) {
 		Span<Q,V,Args...> ret;
 		for(const auto & el: container) {
-			ret.container.push_back(f(el));
+			ret.container.insert(ret.container.end(), f(el));
 		}
 		return ret;
 	}
 	template<typename W>
-	typename std::enable_if<std::is_same<W, std::vector<typename W::value_type,typename W::allocator_type>>::value,
-	Span<typename W::value_type,V,Args...>>::type flatMap ( std::function<W(T)> f) {
+	Span<typename W::value_type,V,Args...> flatMap ( std::function<W(T)> f) {
 		Span<typename W::value_type,V,Args...> ret;
 		for(const auto & el: container) {
 			W tmp = f(el);
 			for(const auto & el2 : tmp)
-			ret.container.push_back(el2);
+			ret.container.insert(ret.container.end(), el2);
 		}
 		return ret;
 	}
 
-	template<typename Q, typename W=V<T, Args...>>
-	typename std::enable_if<std::is_same<W, std::set<
-	typename W::value_type,
-	typename W::key_compare,
-	typename W::allocator_type>>::value,
-	Span<Q,V,Args...>>::type map ( std::function<Q(T)> f ) {
-		Span<Q,V,Args...> ret;
-		for(const auto & el: container) {
-			ret.container.insert(f(el));
-		}
-		return ret;
-	}
 
 	T reduce(std::function<T(T,T)> f) {
 		auto it = container.begin();
@@ -100,45 +90,39 @@ public:
 		return result;
 	}
 
-	template<typename W=V<T, Args...>>
-	typename std::enable_if<std::is_same<W, std::vector<typename W::value_type,typename W::allocator_type>>::value,
-	Span<T,V,Args...>>::type filter ( std::function<bool(T)> f) {
+    template<typename Q>
+    struct is_pair{};
+    
+    template<typename Key, typename Val> 
+    struct is_pair<std::pair<Key, Val>> {
+        typedef std::map<Key, Val> map_type;
+        typedef std::unordered_map<Key, Val> unordered_map_type;
+    };
+    template<typename Q=T>
+    struct is_pair<Q>::map_type toTreeMap() {
+        typename is_pair<Q>::map_type resultContainer;
+        for(const auto & c: container) {
+            resultContainer[c.first] = c.second;
+        }
+        return spanMap(resultContainer);
+    }
+
+
+	Span<T,V,Args...> filter ( std::function<bool(T)> f) {
 		Span<T,V,Args...> ret;
 		for(const auto & el: container) {
 			if(f(el))
-				ret.container.push_back(el);
+				ret.container.insert(ret.container.end(), el);
 		}
 		return ret;
 	}
+    
+    template<typename Q=T, typename isPair = is_pair<T>>
+    void doSth() {
 
-	template<typename W=V<T, Args...>>
-	typename std::enable_if<std::is_same<W, std::set<
-	typename W::value_type,
-	typename W::key_compare,
-	typename W::allocator_type>>::value,
-	Span<T,V,Args...>>::type filter ( std::function<bool(T)> f) {
-		Span<T,V,Args...> ret;
-		for(const auto & el: container) {
-			if(f(el))
-				ret.container.insert(el);
-		}
-		return ret;
-	}
+    }
+    
 
-	template<typename Q, typename W=V<T, Args...>>
-	typename std::enable_if<std::is_same<W, std::set<
-	typename W::value_type,
-	typename W::key_compare,
-	typename W::allocator_type>>::value,
-	Span<Q,V,Args...>>::type flatMap ( std::function<W(T)> f) {
-		Span<Q,V,Args...> ret;
-		for(const auto & el: container) {
-			W tmp = f(el);
-			for(const auto & el2 : tmp)
-			ret.container.insert(f(el2));
-		}
-		return ret;
-	}
 };
 
 // As above, but for map and unordered map this time.
@@ -182,10 +166,28 @@ public:
 		}
 		return ret;
 	}
-	std::vector<std::pair<K,T>> toVec (){
-		std::vector<std::pair<K,T>> ret;
-		for(const auto & c : _map) {
-			ret.push_back(c);
+    typedef std::vector<std::pair<K,T>> pairVec;
+	Span<typename pairVec::value_type, std::vector, typename pairVec::allocator_type>
+        toVec (){
+        Span<typename pairVec::value_type, std::vector, typename pairVec::allocator_type> ret;
+        for(const auto & c : _map) 
+        {
+			ret.container.push_back(c);
+		}
+		return ret;
+	}
+    typedef std::set<std::pair<K,T>> pairSet;
+	typedef Span<typename pairSet::value_type, 
+        std::set, 
+        typename pairSet::key_compare,
+        typename pairSet::allocator_type> pair_span_set;
+    pair_span_set st1;
+    
+    pair_span_set toSet (){
+        pair_span_set ret;
+        for(const auto & c : _map) 
+        {
+			ret.container.insert(c);
 		}
 		return ret;
 	}
