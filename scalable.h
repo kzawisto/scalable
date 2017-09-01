@@ -99,13 +99,7 @@ public:
         typedef std::unordered_map<Key, Val> unordered_map_type;
     };
     template<typename Q=T>
-    struct is_pair<Q>::map_type toTreeMap() {
-        typename is_pair<Q>::map_type resultContainer;
-        for(const auto & c: container) {
-            resultContainer[c.first] = c.second;
-        }
-        return spanMap(resultContainer);
-    }
+    struct is_pair<Q>::map_type toTreeMap();
 
 
 	Span<T,V,Args...> filter ( std::function<bool(T)> f) {
@@ -192,6 +186,16 @@ public:
 		return ret;
 	}
 };
+
+template<typename T, template<typename, typename...> class V, typename... Args>
+template<typename Q=T>
+struct is_pair<Q>::map_type Span<T,V,Args...>::toTreeMap() {
+    typename is_pair<Q>::map_type resultContainer;
+    for(const auto & c: container) {
+        resultContainer[c.first] = c.second;
+    }
+    return spanMap(resultContainer);
+}
 
 // helper functions to avoid direct template specialization neccessary for classes.
 template<typename T, template<typename, typename...> class V, typename... Args>
