@@ -83,6 +83,25 @@ TEST(collect, collect_should_group_numbers_by_parity_preserving_order) {
      EXPECT_EQ(m1.at(false), std::list<int>({1,3,5,7}));
 }
 
+TEST(collect, scanLeft_should_compute_cumsum_of_squares) {
+    std::vector<int> data{1, 2, 3, 4, 5, 6, 7 ,8};
+    auto m = collect(data)
+        .scanLeft(0, fun([](int i, int j) { return i + j * j;}))
+        .scanLeft(std::make_pair(0,0), fun([](std::pair<int,int> i, int j) { 
+                return std::make_pair(i.second, j);
+        }))
+        .map(fun([](std::pair<int, int> p) { 
+            return p.second - p.first; 
+        }))
+        .get();
+        
+        
+    auto squares = collect(data).map(fun([] ( int i ) {
+        return i * i;
+    })).get();
+    EXPECT_EQ(m, squares);
+}
+
 void function_for_template_compilation_tests() {
     is_pair<std::pair<int, int>>::map_type map1;
     is_pair<int> stru;
