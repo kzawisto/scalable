@@ -3,7 +3,7 @@
 
 #include "gtest/gtest.h"
 #include<bits/stdc++.h>
-#include "scalable.h"
+#include "scalable/scalable.h"
 
 TEST(span, map_filter_reduce_should_perform_arithmetics_on_doubles) {
 	std::vector<int> arr{1,2,3,4,5};
@@ -40,20 +40,12 @@ TEST(span, flatMap_should_work) {
 
 }
 
-template<typename T>
-struct is_pair{};
-
-template<typename Key, typename Val> 
-struct is_pair<std::pair<Key, Val>> {
-  typedef std::map<Key, Val> map_type; 
-  typedef std::unordered_map<Key, Val> unordered_map_type;
-};
 TEST(spanMap, should_work_for_map) {
 
 	std::map<std::string, double> mymap{{"A",1},{"B",2},{"C",3}};
 	auto v1 =  spanMap(mymap);
     spanMap(mymap).toVec();
-    spanMap(mymap).toSet();
+    spanMap(mymap).toTreeSet();
 	auto m = spanMap(mymap)
 		.map(fun ( [] (std::string s, double d) {
 		std::stringstream ss;
@@ -65,13 +57,17 @@ TEST(spanMap, should_work_for_map) {
 	EXPECT_EQ(m.get().at("C"), "C-3");
   
 	is_pair<std::pair<int, int>>::map_type map1;
-//	is_pair<int>::map_type map2;
+    is_pair<int> stru;
     auto m1 =  span(std::vector<std::pair<int,int>>{{1,2},{3,4}})
-        .toTreeMap();
+        .toTreeMap().get();
 
     EXPECT_EQ(m1.at(1), 2);
     EXPECT_EQ(m1.at(3), 4);
+    std::unordered_map<int,int> m2=span(std::vector<std::pair<int,int>>{{7,2},{6,4}})
+        .toHashMap().get();
 
+    EXPECT_EQ(m2.at(7), 2);
+    EXPECT_EQ(m2.at(6), 4);
 
 }
 
