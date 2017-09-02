@@ -1,41 +1,63 @@
 #pragma once
 
 // impl header, should not be included on its own
+#include<scalable/_Collect.h>
+#include<scalable/_CollectMap.h>
+namespace scalable
+{
 
-namespace scalable {
 
-
-template<typename T, template<typename, typename...> class V, typename... Args>
+template<typename Value, template<typename, typename...> class Container, typename... Args>
 template<typename Q, typename MapType>
-CollectMap<typename MapType::key_type, 
-    typename MapType::mapped_type, 
-    std::map,
-    typename MapType::key_compare,
-    typename MapType::allocator_type
-    > 
-Collect<T,V,Args...>::toTreeMap() {
+CollectMap<typename MapType::key_type,
+           typename MapType::mapped_type,
+           std::map,
+           typename MapType::key_compare,
+           typename MapType::allocator_type
+           >
+           Collect<Value, Container ,Args...>::toTreeMap()
+{
     MapType resultContainer;
-    for(const auto & c: container) {
+    for ( const auto & c: container ) {
         resultContainer[c.first] = c.second;
     }
-    return collectMap(resultContainer);
+    return collectMap ( resultContainer );
 }
 
 
-template<typename T, template<typename, typename...> class V, typename... Args>
+template<typename Value, template<typename, typename...> class Container, typename... Args>
 template<typename Q, typename MapType>
-CollectMap<typename MapType::key_type, 
-    typename MapType::mapped_type, 
-    std::unordered_map,
-    typename MapType::hasher,
-    typename MapType::key_equal,
-    typename MapType::allocator_type
-> 
-Collect<T,V,Args...>::toHashMap() {
+CollectMap<typename MapType::key_type,
+           typename MapType::mapped_type,
+           std::unordered_map,
+           typename MapType::hasher,
+           typename MapType::key_equal,
+           typename MapType::allocator_type
+           >
+           Collect<Value, Container, Args...>::toHashMap()
+{
     MapType resultContainer;
-    for(const auto & c: container) {
+    for ( const auto & c: container ) {
         resultContainer[c.first] = c.second;
     }
-    return collectMap(resultContainer);
+    return collectMap ( resultContainer );
 }
+
+template<typename Value, template<typename, typename...> class Container, typename... Args>
+template<typename Q, typename V, typename MapType>
+CollectMap<typename MapType::key_type,
+           typename MapType::mapped_type,
+           std::map,
+           typename MapType::key_compare,
+           typename MapType::allocator_type
+           > Collect<Value, Container, Args...>::groupBy ( std::function<V ( Q ) > f )
+{
+    MapType resultContainer;
+    for(const auto & elem: container) {
+        resultContainer[f(elem)].push_back(elem);
+    }
+    return collectMap(resultContainer);
+    
+}
+
 } // namespace scalable

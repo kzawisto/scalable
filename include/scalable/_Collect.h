@@ -6,41 +6,43 @@
 #include<list>
 #include<scalable/_is_pair.h>
 namespace scalable {
-template<typename K, typename T, template<typename,typename, typename...> class V, typename... Args>
+template<typename Key, typename Value, template<typename,typename, typename...> class Container, typename... Args>
 class CollectMap ;
 
 // Wrapper for container holding an array of values
 // such as vector, set etc.
-template<typename T, template<typename, typename...> class V, typename... Args>
+template<typename Value, template<typename, typename...> class Container, typename... Args>
 class Collect {
 public:
-	V<T,Args...> container;
-    typedef std::vector<T> VecT;
-    typedef std::set<T> TreeSetT;
-    typedef std::list<T> ListT;
-    typedef std::unordered_set<T> HashSetT;
+	Container<Value,Args...> container;
+    typedef std::vector<Value> VecT;
+    typedef std::set<Value> TreeSetT;
+    typedef std::list<Value> ListT;
+    typedef std::unordered_set<Value> HashSetT;
 	Collect(){
 
 	}
-	Collect(const V<T,Args...> & vec) : container(vec.begin(), vec.end()) {
+	Collect(const Container<Value,Args...> & vec) : container(vec.begin(), vec.end()) {
 
 	}
-	V<T,Args...> get() {
+	Container<Value,Args...> get() {
 		return container;
 	}
     template<typename Q>
-	Collect<Q,V,Args...> map ( std::function<Q(T)> f) {
-		Collect<Q,V,Args...> ret;
+	Collect<Q,Container,Args...> map ( std::function<Q(Value)> f) {
+		Collect<Q,Container,Args...> ret;
 		for(const auto & el: container) {
 			ret.container.insert(ret.container.end(), f(el));
 		}
 		return ret;
 	}
-	template<typename W>
-	Collect<typename W::value_type,V,Args...> flatMap ( std::function<W(T)> f) {
-		Collect<typename W::value_type,V,Args...> ret;
+	template<typename ReturnType>
+	Collect<typename ReturnType::value_type,Container,Args...> flatMap ( 
+        std::function<ReturnType(Value)> f
+    ) {
+		Collect<typename ReturnType::value_type,Container,Args...> ret;
 		for(const auto & el: container) {
-			W tmp = f(el);
+			ReturnType tmp = f(el);
 			for(const auto & el2 : tmp)
 			ret.container.insert(ret.container.end(), el2);
 		}
@@ -48,9 +50,9 @@ public:
 	}
 
 
-	T reduce(std::function<T(T,T)> f) {
+	Value reduce(std::function<Value(Value, Value)> f) {
 		auto it = container.begin();
-		T result = *it;
+		Value result = *it;
 		it++;
 		for(;it != container.end();it++) {
 			result = f(result, *it);
@@ -58,7 +60,7 @@ public:
 		return result;
 	}
 
-    template<typename Q=T, typename MapType= typename is_pair<Q>::map_type>
+    template<typename Q=Value, typename MapType= typename is_pair<Q>::map_type>
     CollectMap<typename MapType::key_type, 
         typename MapType::mapped_type, 
         std::map,
@@ -66,7 +68,7 @@ public:
         typename MapType::allocator_type
     > toTreeMap();
 
-    template<typename Q=T, typename MapType= typename is_pair<Q>::unordered_map_type>
+    template<typename Q=Value, typename MapType= typename is_pair<Q>::unordered_map_type>
     CollectMap<typename MapType::key_type, 
         typename MapType::mapped_type, 
         std::unordered_map,
@@ -76,19 +78,28 @@ public:
     > toHashMap();
 
 
-	Collect<T,V,Args...> filter ( std::function<bool(T)> f) {
-		Collect<T,V,Args...> ret;
+	Collect<Value,Container,Args...> filter ( std::function<bool(Value)> f) {
+		Collect<Value,Container,Args...> ret;
 		for(const auto & el: container) {
 			if(f(el))
 				ret.container.insert(ret.container.end(), el);
 		}
 		return ret;
 	}
+
+	
+    template<typename Q=Value, typename V, typename MapType= std::map<V,std::list<Q> >>
+    CollectMap<typename MapType::key_type, 
+        typename MapType::mapped_type, 
+        std::map,
+        typename MapType::key_compare,
+        typename MapType::allocator_type
+    > groupBy(std::function<V(Q)> f);
 };
 
-template<typename T, template<typename, typename...> class V, typename... Args>
-Collect<T, V, Args...> collect(V<T,Args...> v) {
-	return Collect<T,V,Args...>(v);
+template<typename Value, template<typename, typename...> class Container, typename... Args>
+Collect<Value, Container, Args...> collect(Container<Value,Args...> v) {
+	return Collect<Value,Container,Args...>(v);
 }
 
 } //namespace scalable
