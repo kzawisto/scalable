@@ -4,7 +4,7 @@
 #include "gtest/gtest.h"
 #include<bits/stdc++.h>
 #include <scalable/scalable.h>
-
+#define _F(x) (fun([] x);
 using namespace scalable;
 
 
@@ -100,6 +100,42 @@ TEST(collect, scanLeft_should_compute_cumsum_of_squares) {
         return i * i;
     })).get();
     EXPECT_EQ(m, squares);
+}
+
+TEST(collectMap, get_key_or_values_from_map){ 
+    auto col = collectMap(std::map<std::string, int> {{"A", 1},{"B", 2}});
+    auto expectedKeys = std::set<std::string>{"A","B"};
+    auto expectedValues = std::vector<int>{1,2};
+    EXPECT_EQ(col.getKeys().get(),expectedKeys);
+    EXPECT_EQ(col.getValues().get(),expectedValues);
+}
+TEST(collect, showcase_example) {
+	collect(std::set<int>{1,2,3,4,5})
+					.map(fun([](int i ) {
+                                return i * i; 
+                    }))
+                    .filter(fun([](int j) {
+                                return j < 18;
+                    }))
+                    .flatMap(fun([](int i) {
+                                return std::set<int>{ i, i + 1, i + 2};
+                    }))
+                    .groupBy(fun([](int j) {
+                                return j % 2 == 0;
+                    }))
+                    .map(fun([](bool v, std::list<int> l) {
+                                    return collect(l)
+                                        .map(fun([](int i) {
+                                                std::stringstream ss;
+                                                ss<< i;
+                                                return ss.str();
+                                        }))
+                                        .reduce(fun([] (std::string lhs, std::string rhs){
+                                                return lhs + "_" + rhs;
+                                                    }));
+                                }))
+                    .get()
+                    .at(true);
 }
 
 void function_for_template_compilation_tests() {
