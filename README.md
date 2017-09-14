@@ -37,7 +37,7 @@ collect(std::set<int>{1,2,3,4,5})
 
 ### Motivation
 
-This  involve some iteration and return an another collection or a single value. It was noticed some time ago that usually such operations can be decomposed into chains of some more general abstractions of control flow that apply a function to the values in some specified manner. The most common are map (e.g. for set of x produce set of x doubled), reduce (e.g. produce sum of elements)  and filter (e.g. find numbers in a list that are odd). If you are not familiar with them you could read some details [here on MIT website](http://web.mit.edu/6.005/www/fa15/classes/25-map-filter-reduce/).
+This is about operations on collections that involve some iteration and return an another collection or a single value. It was noticed some time ago that usually such operations can be decomposed into chains of some more general abstractions of control flow that apply a function to the values in some specified manner. The most common are map (e.g. for set of x produce set of x doubled), reduce (e.g. produce sum of elements)  and filter (e.g. find numbers in a list that are odd). If you are not familiar with them you could read some details [here on MIT website](http://web.mit.edu/6.005/www/fa15/classes/25-map-filter-reduce/).
 
 
 I will give a simple example of such operation in Scala: let us, for each number from 0 to 10 calculate the square, and sum squares that are less than 50:
