@@ -1,10 +1,8 @@
-### Scalable
+# Scalable
 
 ## Sugar for C++ STL containers inspired by scala.
 
-# Scala-like immutable interface for C++ STL containers
-
-## TL DR
+### TL DR
 
 Scalable is a C++ library that allows to write complex container operations in simplier and more readable way. It is inspired by Scala language. It provides functional implementations of higher level operations on containers and operates on immutable object, thus limiting space for errors and making coding easier and faster. See the following example and unit tests for reference. Code is available on [github](https://github.com/kzawisto/scalable) and shared under MIT License.
 ```c++
@@ -37,7 +35,7 @@ collect(std::set<int>{1,2,3,4,5})
 
 ```
 
-## Motivation
+### Motivation
 
 This  involve some iteration and return an another collection or a single value. It was noticed some time ago that usually such operations can be decomposed into chains of some more general abstractions of control flow that apply a function to the values in some specified manner. The most common are map (e.g. for set of x produce set of x doubled), reduce (e.g. produce sum of elements)  and filter (e.g. find numbers in a list that are odd). If you are not familiar with them you could read some details [here on MIT website](http://web.mit.edu/6.005/www/fa15/classes/25-map-filter-reduce/).
 
@@ -75,7 +73,7 @@ Obviously there are deep reasons why C++ is built upon completely different prin
 
 In my humble opinion most of the time for each small chunk of as-fast-as-possible code you would have a large pile of complex code than can be slow, where few miliseconds for one less thing to worry about would be a huge bargain. One could for instance think of replacing interface STL provides , sweeping all the gory details under the rug.
 
-## Installation
+### Installation
 
 C++11 or newer required, tested with g++-5.2 and clang 3.8.
 
