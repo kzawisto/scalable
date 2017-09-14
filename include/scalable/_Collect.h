@@ -31,7 +31,7 @@ public:
         return container;
     }
     template<typename Q>
-    Collect<Q,Container,Args...> map ( std::function<Q ( Value ) > f ) {
+    Collect<Q,Container,Args...> map ( std::function<Q (Value) > f ) {
         Collect<Q,Container,Args...> ret;
         for ( const auto & el: container ) {
             ret.container.insert ( ret.container.end(), f ( el ) );
@@ -40,7 +40,7 @@ public:
     }
     template<typename ReturnType>
     Collect<typename ReturnType::value_type,Container,Args...> flatMap (
-        std::function<ReturnType ( Value ) > f
+        std::function<ReturnType (Value) > f
     ) {
         Collect<typename ReturnType::value_type,Container,Args...> ret;
         for ( const auto & el: container ) {
@@ -51,7 +51,13 @@ public:
         }
         return ret;
     }
-
+    template<typename ReturnType>
+    Collect<typename ReturnType::value_type,Container,Args...> flatMap (
+        std::function<ReturnType (const Value &) > f
+    ) {
+        std::function<ReturnType(Value)> newF = f;
+        return flatMap(newF);
+    }
     template<typename Q>
     Collect<Q,Container,Args...> scanLeft ( Q initial, std::function<Q ( Q, Value ) > f ) {
         Collect<Q,Container,Args...> ret;

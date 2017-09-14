@@ -24,14 +24,14 @@ TEST(collect, map_filter_reduce_should_perform_arithmetics_on_int_set) {
 	std::set<int> myset{1,2,3,4,5};
 	auto v1 =  collect(myset)
 					.map(fun([] (int i ) {return i *2; }))
-					.filter(fun([](int j) {return j < 8;}))
+					.filter(fun([](const int &j) {return j < 8;}))
 					.reduce(fun([](int j, int i) {return i + j;}));
 	EXPECT_DOUBLE_EQ(v1, 12);
 }
 TEST(collect, flatMap_should_work) {
 
 		auto b = collect(std::vector<int>{1,2,3,4})
-				.flatMap(fun([] (int j) {
+				.flatMap(fun([] (const int & j) {
 					std::vector<int> v;
 					for(int i =0; i < j;++i) v.push_back(i);
 					return v;
