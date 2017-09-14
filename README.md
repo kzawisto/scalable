@@ -4,7 +4,7 @@
 
 ### TL DR
 
-Scalable is a C++ library that allows to write complex container operations in simplier and more readable way. It is inspired by Scala language. It provides functional implementations of higher level operations on containers and operates on immutable object, thus limiting space for errors and making coding easier and faster. See the following example and unit tests for reference. Code is available on [github](https://github.com/kzawisto/scalable) and shared under MIT License.
+Scalable is a C++ library that allows to write complex container operations in simplier and more readable way. It is inspired by Scala language. It provides higher level operations on containers and operates on immutable objects, making coding easier and doing mistakes harder. See the following example and unit tests for reference. Code is available on [github](https://github.com/kzawisto/scalable) and shared under MIT License.
 ```c++
 collect(std::set<int>{1,2,3,4,5})
     .map(fun([](int i ) {
