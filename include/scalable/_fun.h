@@ -7,9 +7,8 @@
 
 
 
-// Lambdas are sugar for functor class in c++ 11. To use them efficiently
-// we need to pass them to functions somehow, and using auto makes type deduction impossible.
-// We cast it to std::function with fun() function instead.
+// Lambdas are sugar for functor class in c++ 11.
+// Here cast it to std::function with fun() function instead.
 
 namespace scalable {
 template <typename F>
