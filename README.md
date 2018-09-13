@@ -1,6 +1,12 @@
 # Scalable
 
 ## Sugar for C++ STL containers inspired by scala.
+### Important:
+
+If you plan to use this in any way, then here you can find technically superior alternative to this little library, it is more elegant, less verbose and highly efficient as it avoids pointer calls and excessive memory use. 
+
+https://github.com/kzawisto/glues
+
 
 ### TL DR
 
