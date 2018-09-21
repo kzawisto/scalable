@@ -4,9 +4,12 @@
 #include<map>
 #include<unordered_map>
 #include<list>
+#include<unordered_set>
 #include<scalable/_is_pair.h>
+#include<scalable/_traits.h>
 namespace scalable
 {
+
 template<typename Key, typename Value, template<typename,typename, typename...> class Container, typename... Args>
 class CollectMap ;
 
@@ -30,36 +33,29 @@ public:
     Container<Value,Args...> get() {
         return container;
     }
-    template<typename Q>
-    Collect<Q,Container,Args...> map ( std::function<Q (Value) > f ) {
-        Collect<Q,Container,Args...> ret;
+    template<typename Op>
+    Collect<func_ret<Op,Value>,Container,Args...> map ( Op f ) {
+        Collect<func_ret<Op,Value>,Container,Args...> ret;
         for ( const auto & el: container ) {
             ret.container.insert ( ret.container.end(), f ( el ) );
         }
         return ret;
     }
-    template<typename ReturnType>
-    Collect<typename ReturnType::value_type,Container,Args...> flatMap (
-        std::function<ReturnType (Value) > f
+    template<typename Op>
+    Collect<typename func_ret<Op, Value>::value_type,Container,Args...> flatMap (
+        Op f
     ) {
-        Collect<typename ReturnType::value_type,Container,Args...> ret;
+        Collect<typename func_ret<Op, Value>::value_type,Container,Args...> ret;
         for ( const auto & el: container ) {
-            ReturnType tmp = f ( el );
+            auto tmp = f ( el );
             for ( const auto & el2 : tmp ) {
                 ret.container.insert ( ret.container.end(), el2 );
             }
         }
         return ret;
     }
-    template<typename ReturnType>
-    Collect<typename ReturnType::value_type,Container,Args...> flatMap (
-        std::function<ReturnType (const Value &) > f
-    ) {
-        std::function<ReturnType(Value)> newF = f;
-        return flatMap(newF);
-    }
-    template<typename Q>
-    Collect<Q,Container,Args...> scanLeft ( Q initial, std::function<Q ( Q, Value ) > f ) {
+    template<typename Q, typename Op>
+    Collect<Q,Container,Args...> scanLeft ( Q initial, Op f ) {
         Collect<Q,Container,Args...> ret;
         for ( const auto & el: container ) {
             initial = f ( initial, el );
@@ -68,7 +64,8 @@ public:
         }
         return ret;
     }
-    Value reduce ( std::function<Value ( Value, Value ) > f ) {
+    template<typename Op>
+    Value reduce ( Op f ) {
         auto it = container.begin();
         Value result = *it;
         it++;
@@ -96,7 +93,8 @@ public:
                > toHashMap();
 
 
-    Collect<Value,Container,Args...> filter ( std::function<bool ( Value ) > f ) {
+    template<typename Op>
+    Collect<Value,Container,Args...> filter ( Op f ) {
         Collect<Value,Container,Args...> ret;
         for ( const auto & el: container ) {
             if ( f ( el ) ) {
@@ -107,19 +105,29 @@ public:
     }
 
 
-    template<typename Q=Value, typename V, typename MapType= std::map<V,std::list<Q> >>
+    template<typename Op, typename MapType= std::map<func_ret<Op, Value>,std::vector<Value> >>
     CollectMap<typename MapType::key_type,
                typename MapType::mapped_type,
                std::map,
                typename MapType::key_compare,
                typename MapType::allocator_type
-               > groupBy ( std::function<V ( Q ) > f );
+               > groupBy ( Op f );
 };
 
 template<typename Value, template<typename, typename...> class Container, typename... Args>
 Collect<Value, Container, Args...> collect ( Container<Value,Args...> v )
 {
     return Collect<Value,Container,Args...> ( v );
+}
+
+
+template<typename T>
+using deref_iter = typename std::iterator_traits<T>::value_type;
+
+template<typename T>
+Collect<deref_iter<T>, std::vector, std::allocator<deref_iter<T>>> vectorize(T begin, T end) {
+	return collect(
+			std::vector<deref_iter<T>>(begin, end));
 }
 
 } //namespace scalable

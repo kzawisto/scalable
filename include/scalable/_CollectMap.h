@@ -1,5 +1,6 @@
 #pragma once
 #include<scalable/_Collect.h>
+#include<scalable/_traits.h>
 namespace scalable
 {
 
@@ -18,27 +19,27 @@ public:
     const V<K,T,Args...> & get() {
         return _map;
     }
-    template<typename Q>
-    CollectMap<K,Q,V,Args...> map ( std::function<Q ( T ) > f ) {
-        CollectMap<K,Q,V,Args...> ret;
-        for ( const auto & el: _map ) {
-            ret[el.first] = f ( el.second );
-        }
-        return ret;
-    }
-    template<typename Q>
-    CollectMap<K,Q,V,Args...> map ( std::function<Q ( K,T ) > f ) {
-        CollectMap<K,Q,V,Args...> ret;
+    template<typename Op>
+    using RetMap = CollectMap<K,func_ret_binary<Op,K,T>,V,Args...> ;
+
+    using ThisMap = CollectMap<K, T, V, Args...>;
+
+    template<typename Op>
+    RetMap<Op> map ( Op f ) {
+        RetMap<Op> ret;
         for ( const auto & el: _map ) {
             ret._map[el.first] = f ( el.first, el.second );
+
         }
         return ret;
     }
 
-    CollectMap<K,T,V,Args...> filter ( std::function<bool ( T ) > f ) {
+
+    template<typename Op>
+    CollectMap<K,T,V,Args...> filter ( Op f ) {
         CollectMap<K, T,V,Args...> ret;
         for ( const auto & el: _map ) {
-            if ( f ( el.second ) ) {
+            if ( f ( el.first, el.second ) ) {
                 ret._map[el.first] = el.second;
             }
         }
@@ -47,6 +48,7 @@ public:
 
     typedef std::vector<std::pair<K,T>> PairVec;
     typedef Collect<typename PairVec::value_type, std::vector, typename PairVec::allocator_type> PairVecCollect;
+
     PairVecCollect toVec () {
         PairVecCollect ret;
         for ( const auto & c : _map ) {
