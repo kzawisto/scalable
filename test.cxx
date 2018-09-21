@@ -156,11 +156,9 @@ TEST(collect, showcase_example) {
                     })
                     .map([](bool v, std::vector<int> l) {
                                     return collect(l)
-                                        .map(fun([](int i) {
-                                                std::stringstream ss;
-                                                ss<< i;
-                                                return ss.str();
-                                        }))
+                                        .map([](int i) {
+                                                return std::to_string(i);
+                                        })
                                         .reduce(fun([] (std::string lhs, std::string rhs){
                                                 return lhs + "_" + rhs;
                                                     }));
