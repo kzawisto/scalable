@@ -19,9 +19,13 @@ public:
     const V<K,T,Args...> & get() {
         return _map;
     }
-    template<typename Op>
-    using RetMap = CollectMap<K,func_ret_binary<Op,K,T>,V,Args...> ;
 
+    template<typename Op>
+    using ret_type = func_ret_binary<Op,K,T>;
+
+
+    template<typename Op>
+    using RetMap = CollectMap<K,ret_type<Op>,V>; //V<K, ret_type<Op>>;//decltype(get_ret_type(std::declval<Op>()));
     using ThisMap = CollectMap<K, T, V, Args...>;
 
     template<typename Op>

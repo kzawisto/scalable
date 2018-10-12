@@ -101,6 +101,14 @@ TEST(collect, set_of_pairs_should_be_convertible_to_hash_map) {
     EXPECT_EQ(m2.at(6), 4);
 }
 
+TEST(collect, mapping_should_work_on_hash_map) {
+    std::unordered_map<int,double> m2=collect(std::set<std::pair<int,int>>{{7,2},{6,4}})
+        .toHashMap().map([] ( int i, int j ){return j +1.0;}).get();
+
+    EXPECT_EQ(m2.at(7), 3);
+    EXPECT_EQ(m2.at(6), 5);
+}
+
 
 TEST(collect, collect_should_group_numbers_by_parity_preserving_order) {
     auto m1 = collect(std::vector<int>{1, 2, 3, 4, 5, 6, 7 ,8})
