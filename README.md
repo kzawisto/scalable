@@ -5,9 +5,7 @@
 
 ### About
 
-Scalable is a C++ library that wraps STL with interface that assures immutability and provides higher level abstractions of control flow, 
-such as monadic operations. This helps to make the program more readable and highly reliable, as well as reduce total development and maintenance costs, especially in parts not crucial to performance.
-At the same time it works for dynamically as well as statically (functor/lambdas) called functionoids, which gives it efficiency on par with  handrolled control flow.
+Scalable is a C++ library that wraps STL with immutable interface modeled after Scala lanugage. Works for dynamically as well as statically (functor/lambdas) called functionoids, which gives it efficiency on par with  handrolled control flow.
 See the following example and unit tests for reference. Code is available on [github](https://github.com/kzawisto/scalable) and shared under MIT License.
 
 
